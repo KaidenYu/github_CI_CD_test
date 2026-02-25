@@ -1,0 +1,38 @@
+name: C Project CI/CD
+
+# 觸發條件：當推送到 main 分支，或是對 main 發起 Pull Request 時
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    # 指定執行的虛擬機環境
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 抓取你的程式碼
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. 安裝編譯工具 (Ubuntu 預設通常已有，但確保最新)
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y gcc make
+
+    # 3. 執行編譯 (會呼叫 Makefile 的 all)
+    - name: Build the project
+      run: make all
+
+    # 4. 執行測試 (如果測試失敗，這個 CI 就會中斷並標示失敗)
+    - name: Run tests
+      run: make test
+
+    # 5. 上傳產出的執行檔 (CD 的概念：發布成品)
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: compiled-main-app
+        path: main
+        retention-days: 7
